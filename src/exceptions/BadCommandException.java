@@ -1,0 +1,10 @@
+package exceptions;
+
+public class BadCommandException extends RuntimeException {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+}
