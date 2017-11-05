@@ -3,6 +3,7 @@ package view;
 import model.AnnotationListener;
 import model.DiscordClient;
 import model.InterfaceListener;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 

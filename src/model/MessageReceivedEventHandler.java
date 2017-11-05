@@ -1,8 +1,6 @@
 package model;
 
-import java.util.ArrayList;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import exceptions.BadCommandException;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -10,16 +8,19 @@ import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedE
 public class MessageReceivedEventHandler {
 	private MessageReceivedEvent event;
 	private Timer foodEmojiTimer;
+	private ChatStateManager states;
 	
 	public MessageReceivedEventHandler() {
 		this.foodEmojiTimer = new Timer();
+		this.states = new ChatStateManager();
+		System.out.println(this.states);
 	}
 	
 	public MessageReceivedEventHandler(MessageReceivedEvent event) {
+		this();
 		if (event == null) {
 			throw new IllegalArgumentException("event cannot be null");
 		}
-		this.foodEmojiTimer = new Timer();
 		this.event = event;
 	}
 	
@@ -38,7 +39,7 @@ public class MessageReceivedEventHandler {
 	private void messageLengthEdits() {
 		String message = this.event.getMessage().toString();
 		if (message.length() > 1000) {
-			this.event.getChannel().sendMessage(this.event.getAuthor().getNicknameForGuild(this.event.getGuild()) + " fuck off with your wall of text");
+			this.event.getChannel().sendMessage("@" + this.event.getAuthor().getNicknameForGuild(this.event.getGuild()) + " SIT YOUR PUNK ASS DOWN");
 		}
 	}
 	
@@ -68,6 +69,10 @@ public class MessageReceivedEventHandler {
 	}
 
 	private void foodOn(String message) {
+		if (this.states.isActive("foodSpam")) {
+			this.event.getChannel().sendMessage("The food spammer is already active... FLAU");
+			return;
+		}
 		if (message.equalsIgnoreCase("!foodOn")) {
 			this.event.getChannel().sendMessage("Please indicate the amount of "
 					+ "time in minutes you would like in between emojis... !foodOn [minutes]");
@@ -77,11 +82,12 @@ public class MessageReceivedEventHandler {
 		try {
 			String rate = message.substring(8);
 			parsedRate = Integer.parseInt(rate);
-			if (parsedRate < 60) {
-				parsedRate = 60;
+			if (parsedRate < 3) {
+				parsedRate = 3;
 			}
 			FoodEmojiSpammer fes = new FoodEmojiSpammer(this.event.getChannel());
-			foodEmojiTimer.schedule(fes, 0, parsedRate * 60000);
+			this.foodEmojiTimer.schedule(fes, 0, parsedRate * 1000);
+			this.states.activate("foodSpam");
 		} catch (Exception e) {
 			this.event.getChannel().sendMessage("Something went wrong when"
 					+ "trying to run the !foodOn command with the time: "
