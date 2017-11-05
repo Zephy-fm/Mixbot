@@ -6,6 +6,8 @@ import java.util.TimerTask;
 import sx.blah.discord.handle.obj.IChannel;
 
 public class FoodEmojiSpammer extends TimerTask {
+	public static final int MINIMUM_SECONDS = 15;
+	
 	private IChannel channel;
 	
 	private String[] emojis = 

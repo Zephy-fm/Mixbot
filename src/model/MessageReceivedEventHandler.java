@@ -54,14 +54,20 @@ public class MessageReceivedEventHandler {
 		} else if (message.contains("!foodOn")) {
 			this.foodOn(message);
 		} else if (message.equalsIgnoreCase("!foodOff")) {
-			foodOff();
+			this.foodOff();
+		} else if (message.equalsIgnoreCase("!states")) {
+			this.states();
 		} else {
 			throw new BadCommandException();
 		}
 	}
 
 	private void commands() {
-		this.event.getChannel().sendMessage("!mykey, !foodOn [minutes], !foodOff");
+		this.event.getChannel().sendMessage("!mykey, !foodOn [seconds], !foodOff");
+		/**
+		 * Dev commands:
+		 *  !states
+		 */
 	}
 
 	private void mykey() {
@@ -75,15 +81,15 @@ public class MessageReceivedEventHandler {
 		}
 		if (message.equalsIgnoreCase("!foodOn")) {
 			this.event.getChannel().sendMessage("Please indicate the amount of "
-					+ "time in minutes you would like in between emojis... !foodOn [minutes]");
+					+ "time in seconds you would like in between emojis... !foodOn [seconds] (minimum " + FoodEmojiSpammer.MINIMUM_SECONDS + ")");
 			return;
 		}
 		int parsedRate = -1;
 		try {
 			String rate = message.substring(8);
 			parsedRate = Integer.parseInt(rate);
-			if (parsedRate < 3) {
-				parsedRate = 3;
+			if (parsedRate < FoodEmojiSpammer.MINIMUM_SECONDS) {
+				parsedRate = FoodEmojiSpammer.MINIMUM_SECONDS;
 			}
 			FoodEmojiSpammer fes = new FoodEmojiSpammer(this.event.getChannel());
 			this.foodEmojiTimer.schedule(fes, 0, parsedRate * 1000);
@@ -97,8 +103,18 @@ public class MessageReceivedEventHandler {
 	}
 
 	private void foodOff() {
+		if (!this.states.isActive("foodSpam")) {
+			this.event.getChannel().sendMessage("The food spammer isn't running...");
+			return;
+		}
 		this.foodEmojiTimer.cancel();
 		this.foodEmojiTimer.purge();
+		this.states.deactivate("foodSpam");
+		this.event.getChannel().sendMessage("Food spammer is off... beepboop");
+	}
+
+	private void states() {
+		this.event.getChannel().sendMessage(this.states.toString());
 	}
 
 }

@@ -3,13 +3,14 @@ package model;
 import java.util.HashMap;
 
 public class ChatStateManager {
-	private HashMap<String, Boolean> states;
-	private final static String[] monitoredStates =
+	public final static String[] MONITORED_STATES =
 		{"foodSpam"};
+	
+	private HashMap<String, Boolean> states;
 	
 	public ChatStateManager() {
 		this.states = new HashMap<String, Boolean>();
-		for (String current : monitoredStates) {
+		for (String current : MONITORED_STATES) {
 			this.states.put(current, false);
 		}
 	}
@@ -40,8 +41,8 @@ public class ChatStateManager {
 	
 	public String toString() {
 		String returnMessage = "ChatStateManager: States being monitored [ ";
-		for (String current : ChatStateManager.monitoredStates) {
-			returnMessage += current + " ";
+		for (String current : ChatStateManager.MONITORED_STATES) {
+			returnMessage += current + ":" + this.states.get(current).toString() + " ";
 		}
 		returnMessage += "]";
 		return returnMessage;
