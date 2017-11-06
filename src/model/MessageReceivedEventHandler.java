@@ -8,10 +8,12 @@ import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedE
 public class MessageReceivedEventHandler {
 	private MessageReceivedEvent event;
 	private Timer foodEmojiTimer;
+	private Timer limitedFoodEmojiSpammer;
 	private ChatStateManager states;
 	
 	public MessageReceivedEventHandler() {
 		this.foodEmojiTimer = new Timer();
+		this.limitedFoodEmojiSpammer = new Timer();
 		this.states = new ChatStateManager();
 		System.out.println(this.states);
 	}
@@ -57,6 +59,8 @@ public class MessageReceivedEventHandler {
 			this.foodOff();
 		} else if (message.equalsIgnoreCase("!states")) {
 			this.states();
+		} else if (message.contains("!food")) {
+			food(message);
 		} else {
 			throw new BadCommandException();
 		}
@@ -110,11 +114,43 @@ public class MessageReceivedEventHandler {
 		this.foodEmojiTimer.cancel();
 		this.foodEmojiTimer.purge();
 		this.states.deactivate("foodSpam");
+		this.foodEmojiTimer = new Timer();
 		this.event.getChannel().sendMessage("Food spammer is off... beepboop");
 	}
 
 	private void states() {
 		this.event.getChannel().sendMessage(this.states.toString());
+	}
+
+	private void food(String message) {
+		if (message.equalsIgnoreCase("!food")) {
+			this.event.getChannel().sendMessage("Please indicate the amount of "
+					+ "emojis you would like to produce... !food [repetitions] (maximum " + FoodEmojiSpammerLimited.MAXIMUM_REPETIIONS + ")");
+			return;
+		}
+		int parsedRepetitions = -1;
+		try {
+			String rate = message.substring(6);
+			parsedRepetitions = Integer.parseInt(rate);
+			if (parsedRepetitions < 0) {
+				parsedRepetitions = 0;
+			}
+			if (parsedRepetitions > FoodEmojiSpammerLimited.MAXIMUM_REPETIIONS) {
+				parsedRepetitions = FoodEmojiSpammerLimited.MAXIMUM_REPETIIONS;
+			}
+			try {
+			FoodEmojiSpammer fesl = new FoodEmojiSpammerLimited(this.event.getChannel(), this.limitedFoodEmojiSpammer, parsedRepetitions);
+			this.limitedFoodEmojiSpammer.schedule(fesl, 0, 3000);
+			} catch (IllegalStateException ise) {
+				this.limitedFoodEmojiSpammer = new Timer();
+				this.food(message);
+			}
+		} catch (Exception e) {
+			this.event.getChannel().sendMessage("Something went wrong when "
+					+ "trying to run the !food command with the repetitions: "
+					+ parsedRepetitions + " (-1 indicates an internal error)");
+			e.printStackTrace();
+		}
 	}
 
 }

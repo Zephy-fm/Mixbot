@@ -37,4 +37,12 @@ public class FoodEmojiSpammer extends TimerTask {
 		this.channel.sendMessage(this.emojis[randomInt]);
 	}
 	
+	public String[] getEmojis() {
+		return this.emojis;
+	}
+	
+	public IChannel getChannel() {
+		return this.channel;
+	}
+	
 }
