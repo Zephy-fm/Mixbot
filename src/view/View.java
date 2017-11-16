@@ -1,11 +1,17 @@
 package view;
 
+import java.util.List;
+
 import model.AnnotationListener;
 import model.DiscordClient;
 import model.InterfaceListener;
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * View contains the first methods called

@@ -10,11 +10,13 @@ public class MessageReceivedEventHandler {
 	private Timer foodEmojiTimer;
 	private Timer limitedFoodEmojiSpammer;
 	private ChatStateManager states;
+	private TwitterHandler twitter;
 	
 	public MessageReceivedEventHandler() {
 		this.foodEmojiTimer = new Timer();
 		this.limitedFoodEmojiSpammer = new Timer();
 		this.states = new ChatStateManager();
+		this.twitter = new TwitterHandler();
 		System.out.println(this.states);
 	}
 	
@@ -60,14 +62,16 @@ public class MessageReceivedEventHandler {
 		} else if (message.equalsIgnoreCase("!states")) {
 			this.states();
 		} else if (message.contains("!food")) {
-			food(message);
+			this.food(message);
+		} else if (message.contains("!twitter")) {
+			this.twitter(message);
 		} else {
 			throw new BadCommandException();
 		}
 	}
 
 	private void commands() {
-		this.event.getChannel().sendMessage("!mykey, !foodOn [seconds], !foodOff");
+		this.event.getChannel().sendMessage("!mykey, !foodOn [seconds], !foodOff, !twitter [who]");
 		/**
 		 * Dev commands:
 		 *  !states
@@ -151,6 +155,17 @@ public class MessageReceivedEventHandler {
 					+ parsedRepetitions + " (-1 indicates an internal error)");
 			e.printStackTrace();
 		}
+	}
+	
+	private void twitter(String message) {
+		String trimmedMessage = null;
+		try {
+			trimmedMessage = message.substring(9);
+		} catch (IndexOutOfBoundsException ioobe) {
+			this.event.getChannel().sendMessage("Please include a command at the end of !twiter... \"!twitter poe\"");
+			return;
+		}
+		this.event.getChannel().sendMessage(this.twitter.latestTweet(trimmedMessage));
 	}
 
 }
