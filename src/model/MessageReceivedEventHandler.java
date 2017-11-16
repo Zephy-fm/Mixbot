@@ -2,6 +2,7 @@ package model;
 
 import java.util.Timer;
 
+import controller.Driver;
 import exceptions.BadCommandException;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
@@ -11,12 +12,14 @@ public class MessageReceivedEventHandler {
 	private Timer limitedFoodEmojiSpammer;
 	private ChatStateManager states;
 	private TwitterHandler twitter;
+	private CurrencyRateHandler currency;
 	
 	public MessageReceivedEventHandler() {
 		this.foodEmojiTimer = new Timer();
 		this.limitedFoodEmojiSpammer = new Timer();
 		this.states = new ChatStateManager();
 		this.twitter = new TwitterHandler();
+		this.currency = new CurrencyRateHandler();
 		System.out.println(this.states);
 	}
 	
@@ -56,25 +59,32 @@ public class MessageReceivedEventHandler {
 		} else if (message.equalsIgnoreCase("!mykey")) {
 			this.mykey();
 		} else if (message.contains("!foodOn")) {
-			this.foodOn(message);
+			throw new BadCommandException();
+			//this.foodOn(message);
 		} else if (message.equalsIgnoreCase("!foodOff")) {
-			this.foodOff();
+			throw new BadCommandException();
+			//this.foodOff();
 		} else if (message.equalsIgnoreCase("!states")) {
 			this.states();
 		} else if (message.contains("!food")) {
-			this.food(message);
+			throw new BadCommandException();
+			//this.food(message);
 		} else if (message.contains("!twitter")) {
 			this.twitter(message);
+		} else if (message.equalsIgnoreCase("!restartBot")) {
+			this.restartBot(message);
+		} else if (message.contains("!currency")) {
+			this.currency(message);
 		} else {
 			throw new BadCommandException();
 		}
 	}
 
 	private void commands() {
-		this.event.getChannel().sendMessage("!mykey, !foodOn [seconds], !foodOff, !twitter [who]");
+		this.event.getChannel().sendMessage("!mykey, !foodOn [seconds], !foodOff, !twitter [who], !currency [CUR]");
 		/**
 		 * Dev commands:
-		 *  !states
+		 *  !states, !restartBot
 		 */
 	}
 
@@ -166,6 +176,32 @@ public class MessageReceivedEventHandler {
 			return;
 		}
 		this.event.getChannel().sendMessage(this.twitter.latestTweet(trimmedMessage));
+	}
+	
+	private void restartBot(String message) {
+		Driver.restartApplication();
+	}
+	
+	private void currency(String message) {
+		String trimmedMessage = null;
+		try {
+			trimmedMessage = message.substring(10);
+		} catch (IndexOutOfBoundsException ioobe) {
+			this.event.getChannel().sendMessage("Please include a command at the end of !currency... \"!currency btc\"");
+			return;
+		}
+		if (trimmedMessage.equalsIgnoreCase("update")) {
+			this.event.getChannel().sendMessage(this.currency.reloadData());
+			return;
+		} else if (trimmedMessage.equalsIgnoreCase("commands")) {
+			this.event.getChannel().sendMessage(this.currency.getAllCommands());
+			return;
+		}
+		String rate = this.currency.getCurrencyRate(trimmedMessage);
+		if (rate == null) {
+			throw new BadCommandException();
+		}
+		this.event.getChannel().sendMessage(rate);
 	}
 
 }
