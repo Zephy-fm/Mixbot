@@ -13,7 +13,7 @@ public class MessageReceivedEventHandler {
 	private ChatStateManager states;
 	private TwitterHandler twitter;
 	private CurrencyRateHandler currency;
-	
+
 	public MessageReceivedEventHandler() {
 		this.foodEmojiTimer = new Timer();
 		this.limitedFoodEmojiSpammer = new Timer();
@@ -22,7 +22,7 @@ public class MessageReceivedEventHandler {
 		this.currency = new CurrencyRateHandler();
 		System.out.println(this.states);
 	}
-	
+
 	public MessageReceivedEventHandler(MessageReceivedEvent event) {
 		this();
 		if (event == null) {
@@ -30,26 +30,26 @@ public class MessageReceivedEventHandler {
 		}
 		this.event = event;
 	}
-	
+
 	public void setEvent(MessageReceivedEvent event) {
 		if (event == null) {
 			throw new IllegalArgumentException("event cannot be null");
 		}
 		this.event = event;
 	}
-	
+
 	public void parse() {
 		this.parseMessage(this.event.getMessage().toString());
 		this.messageLengthEdits();
 	}
-	
+
 	private void messageLengthEdits() {
 		String message = this.event.getMessage().toString();
 		if (message.length() > 1000) {
 			this.event.getChannel().sendMessage("@" + this.event.getAuthor().getNicknameForGuild(this.event.getGuild()) + " SIT YOUR PUNK ASS DOWN");
 		}
 	}
-	
+
 	private void parseMessage(String message) {
 		if (!message.substring(0, 1).equals("!")) {
 			return;
@@ -166,7 +166,7 @@ public class MessageReceivedEventHandler {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void twitter(String message) {
 		String trimmedMessage = null;
 		try {
@@ -177,11 +177,11 @@ public class MessageReceivedEventHandler {
 		}
 		this.event.getChannel().sendMessage(this.twitter.latestTweet(trimmedMessage));
 	}
-	
+
 	private void restartBot(String message) {
 		Driver.restartApplication();
 	}
-	
+
 	private void currency(String message) {
 		String trimmedMessage = null;
 		try {
@@ -195,6 +195,9 @@ public class MessageReceivedEventHandler {
 			return;
 		} else if (trimmedMessage.equalsIgnoreCase("commands")) {
 			this.event.getChannel().sendMessage(this.currency.getAllCommands());
+			return;
+		} else if (trimmedMessage.split("\\s").length() = 3) {
+			this.event.getChannel().sendMessage(this.currency.getCurrencyConversion(trimmedMessage));
 			return;
 		}
 		String rate = this.currency.getCurrencyRate(trimmedMessage);
