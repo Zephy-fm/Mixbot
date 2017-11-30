@@ -46,9 +46,21 @@ public class CurrencyRateHandler {
 		return "Currency data successfully updated!";
 	}
 
+	private boolean attemptReloadData() {
+		String attempt = this.reloadData();
+		if (attempt.equals("Could not update the data...")) {
+			return false;
+		}
+		return true;
+	}
+
 	public String getCurrencyRate(String currencyType) {
 		if (currencyType == null) {
 			throw new IllegalArgumentException("currencyType cannot be null");
+		}
+		String errors = "";
+		if (!this.attemptReloadData()) {
+			errors += " |> Couldn't reload the data... using previously found data set";
 		}
 		try {
 			String currencyTypeCapitalized = currencyType.toUpperCase();
@@ -78,13 +90,13 @@ public class CurrencyRateHandler {
 			} else {
 				CurrencyToUSD = String.format("1 " + currencyTypeCapitalized + " -> $%.2f USD", amountInUSD);
 			}
-			return CurrencyToUSD + " || " + USDtoCurrency;
+			return CurrencyToUSD + " || " + USDtoCurrency + " " + errors;
 		} catch (JSONException npe) {
 			return "No currency matching \"" + currencyType + "\"";
 		}
 	}
 
-	public string getCurrencyConversion(String currencyToConvert) {
+	public String getCurrencyConversion(String currencyToConvert) {
 		this.reloadData();
 
 		String conversionArgs[] = currencyToConvert.split("\\s");
@@ -102,8 +114,8 @@ public class CurrencyRateHandler {
 			Double rateFromOriginToDestination = USDrateOfDestinationCurrency / USDrateOfOriginCurrency;
 			Double convertedAmount = Double.parseDouble(amount) * rateFromOriginToDestination;
 
-			return "1 " + currencyOrigin.toUpperCase() + " -> " rateFromOriginToDestination + " " + currencyDestination.toUpperCase()
-			  			+ " || " + amount + " " + currencyOrigin.toUpperCase() + " -> " convertedAmount + " " + currencyDestination.toUpperCase();
+			return "1 " + currencyOrigin.toUpperCase() + " -> " + rateFromOriginToDestination + " " + currencyDestination.toUpperCase()
+			  			+ " || " + amount + " " + currencyOrigin.toUpperCase() + " -> " + convertedAmount + " " + currencyDestination.toUpperCase();
 		} catch (JSONException npe) {
 			return "bad currency type";
 		}

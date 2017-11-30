@@ -196,7 +196,7 @@ public class MessageReceivedEventHandler {
 		} else if (trimmedMessage.equalsIgnoreCase("commands")) {
 			this.event.getChannel().sendMessage(this.currency.getAllCommands());
 			return;
-		} else if (trimmedMessage.split("\\s").length() = 3) {
+		} else if (trimmedMessage.split("\\s").length == 3) {
 			this.event.getChannel().sendMessage(this.currency.getCurrencyConversion(trimmedMessage));
 			return;
 		}
